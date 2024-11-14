@@ -1,9 +1,10 @@
 #include "../include/InputHandler.h"
-#include <conio.h> // For _getch()
+#include "../include/conio.h" // For _getch()
+#include <iostream>
 
 InputType InputHandler::handleInput() {
     while (true) {
-        int input = _getch();
+        int input = getch();
 
         // Filter out unwanted characters like new line or space
         if (input == '\n' || input == '\r' || input == ' ') {
@@ -14,19 +15,19 @@ InputType InputHandler::handleInput() {
         input = static_cast<unsigned char>(toupper(input));
 
         switch (input) {
-            case 'W':
+            case 'W': case 'w':
                 return InputType::UP;
-            case 'S':
+            case 'S': case 's':
                 return InputType::DOWN;
-            case 'A':
+            case 'A': case 'a':
                 return InputType::LEFT;
-            case 'D':
+            case 'D': case 'd':
                 return InputType::RIGHT;
-            case 'E':
+            case 'E': case 'e':
                 return InputType::START_GAME;
-            case 'Q':
+            case 'Q': case 'q':
                 return InputType::QUIT_GAME;
-            case 'U':
+            case 'U': case 'u':
                 return InputType::UNDO;
             default:
                 return InputType::INVALID;

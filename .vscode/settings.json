@@ -1,0 +1,5 @@
+{
+  "cmake.ignoreCMakeListsMissing": true,
+  "editor.formatOnSave": true,
+  "clang-format.executable": "/home/mirai/.clang-format"
+}

@@ -8,15 +8,23 @@ void Game::initGame() {
     moveCount = 0;
     historyGameBoards = std::stack<GameBoard>();
     startTime = std::chrono::system_clock::now();
-    historyGameBoards.push(gameBoard);  // Save initial state
 }
 
 void Game::updateGame(Direction direction) {
-    // TODO
+    historyGameBoards.push(gameBoard);
+    int delta = gameBoard.move(direction);
+    historyScoreDelta.push(delta);
+    moveCount++;
+    score += delta;
 }
 
 void Game::undoLastMove() {
-    // TODO
+    if (historyGameBoards.empty() || historyScoreDelta.empty()) { return; }
+    gameBoard = historyGameBoards.top();
+    historyGameBoards.pop();
+    score -= historyScoreDelta.top();
+    historyScoreDelta.pop();
+    moveCount--;
 }
 
 bool Game::hasWon() const {

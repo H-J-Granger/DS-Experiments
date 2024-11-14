@@ -1,7 +1,7 @@
 #include "../include/GameRender.h"
 #include <iostream>
 #include <iomanip>
-
+#include <cmath>
 
 void TerminalRender::render(const GameBoard &gameBoard, int score, int moveCount) {
     // clearScreen();
@@ -15,14 +15,15 @@ void TerminalRender::render(const GameBoard &gameBoard, int score, int moveCount
 
     // Render game board
     std::cout << "\n";
-    for (int row = 3; row >= 0; --row) {
+    for (int row = 0; row < 4; ++row) {
         std::cout << "+------+------+------+------+\n";
         for (int col = 0; col < 4; ++col) {
-            std::cout << "| " << std::setw(4);
+            std::cout << "| ";
             if (board[row][col] != 0) {
-                std::cout << board[row][col];
+                int val = board[row][col];
+                std::cout << "\033[" << 30 + static_cast<int>(log2(val) / 2 + 1) << "m" << std::setw(4) << val << "\033[0m";
             } else {
-                std::cout << " ";
+                std::cout << std::setw(4) << " ";
             }
             std::cout << " ";
         }

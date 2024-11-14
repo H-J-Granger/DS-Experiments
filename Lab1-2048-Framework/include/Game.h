@@ -24,6 +24,7 @@ private:
     int score{};
     int moveCount{};
     std::stack<GameBoard> historyGameBoards;
+    std::stack<int> historyScoreDelta;
     std::chrono::time_point<std::chrono::system_clock> startTime;
 
 };
