@@ -27,7 +27,7 @@ bool calculator::legal() noexcept {
   constexpr auto is_operator = [](unsigned char ch) {
     return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^';
   };
-  if (std::any_of(expr.cbegin(), expr.cend(), [](char ch) {
+  if (std::any_of(expr.cbegin(), expr.cend(), [is_operator](char ch) {
         return ch != '(' && ch != ')' && ch != '.' &&
                !std::isdigit(static_cast<unsigned char>(ch)) &&
                !is_operator(ch);
@@ -99,7 +99,7 @@ int calculator::priority_regular(char c) {
   if (c == '^') {
     return 2;
   }
-  throw std::out_of_range(
+  throw std::domain_error(
       "DATA_STRUCTURE::calculator::priority_regular: Input is not one of '+', "
       "'-', '*', '/', and '^'.");
 }
@@ -138,7 +138,7 @@ calculator::element calculator::read_num() {
   }
   if (expr_index == len || expr[expr_index] != '.') {  // accepting an integer
     if (integer_overflowed) {
-      throw std::out_of_range(
+      throw std::domain_error(
           std::format("DATA_STRUCTURE::calculator::read_num: Integer out of "
                       "range at col {}",
                       start_index));
@@ -181,7 +181,9 @@ calculator::element calculator::operate(calculator::element element1, char c,
     [[assume(0)]];
   };
   if (element1.flag || element2.flag) {
-    return {1, 0, calc(element1.num_double, element2.num_double, c)};
+    double num1 = element1.flag ? element1.num_double : element1.num_int;
+    double num2 = element2.flag ? element2.num_double : element2.num_int;
+    return {1, 0, calc(num1, num2, c)};
   }
   constexpr auto add = [int_max, int_min](int x, int y) {
     if ((x == 0) || (y == 0)) {
@@ -215,18 +217,19 @@ calculator::element calculator::operate(calculator::element element1, char c,
       return 0;
     }
     int sign1 = x > 0 ? 1 : -1;
-    int sign2 = y < 0 ? 1 : -1;
-    if (y == int_min && x != 1 || x == int_min && y != 1) {
+    int sign2 = y > 0 ? 1 : -1;
+    if ((y == int_min && x != 1) || (x == int_min && y != 1)) {
+      bool overflow = (y == int_min && x < 0) || (x == int_min && y < 0);
       throw std::domain_error(
-          std::format("DATA_STRUCTURE::calculator::operate: Underflow when "
+          std::format("DATA_STRUCTURE::calculator::operate: {} when "
                       "multiplying two integers ({}, {}).",
-                      x, y));
+                      overflow ? "Overflow" : "Underflow", x, y));
     }
     if (x == int_min || y == int_min) {
       return int_min;
     }
     int x2 = x * sign1, y2 = y * sign2;
-    if (x2 < int_max / y2) {
+    if (x2 > int_max / y2) {
       throw std::domain_error(std::format(
           "DATA_STRUCTURE::calculator::operate: {} when multiplying "
           "two integers ({}, {}).",
@@ -259,26 +262,23 @@ calculator::element calculator::operate(calculator::element element1, char c,
     if (y == 1) {
       return x;
     }
-    if (x == int_min) {
-      throw std::domain_error(
-          std::format("DATA_STRUCTURE::calculator::operate: Underflow when "
-                      "calculating pow({}, {}).",
-                      x, y));
-    }
     int answer = 1, nowx = x, nowy = y;
     try {
-      while (y) {
-        if (y & 1) {
-          answer = mul(answer, answer);
+      while (nowy) {
+        if (nowy & 1) {
+          answer = mul(answer, nowx);
         }
         nowx = mul(nowx, nowx);
-        y >>= 1;
+        nowy >>= 1;
       }
-    } catch (...) {
-      throw std::domain_error(
-          std::format("DATA_STRUCTURE::calculator::operate: Overflow when "
-                      "calculating pow({}, {}).",
-                      x, y));
+    } catch (std::exception const& e) {
+      std::string what = e.what();
+      throw std::domain_error(std::format(
+          "DATA_STRUCTURE::calculator::operate: {} when calculating pow({}, "
+          "{}).",
+          (what.find("Underflow") == std::string::npos ? "Overflow"
+                                                       : "Underflow"),
+          x, y));
     }
     return answer;
   };
@@ -293,8 +293,24 @@ calculator::element calculator::operate(calculator::element element1, char c,
       return {0, pow(element1.num_int, element2.num_int), 0.};
     }
     case '-': {
+      if (element2.num_int == int_min && element1.num_int >= 0) {
+        throw std::domain_error(
+            std::format("DATA_STRUCTURE::calculator::operate: Overflow when "
+                        "subtracting {} from {}.",
+                        element2.num_int, element1.num_int));
+      }
       int y = element2.num_int == int_min ? int_min : -element2.num_int;
-      return {0, add(element1.num_int, y), 0.};
+      try {
+        return {0, add(element1.num_int, y), 0.};
+      } catch (std::exception const& e) {
+        std::string what = e.what();
+        throw std::domain_error(std::format(
+            "DATA_STRUCTURE::calculator::operate: {} when subtracting {} from "
+            "{}.",
+            (what.find("Underflow") == std::string::npos ? "Overflow"
+                                                         : "Underflow"),
+            element2.num_int, element1.num_int));
+      }
     }
     case '/': {
       if (element2.num_int == 0) {
@@ -312,6 +328,7 @@ calculator::element calculator::operate(calculator::element element1, char c,
       return {0, element1.num_int / element2.num_int, 0.};
     }
   }
+
   [[assume(0)]];
 }
 
@@ -328,6 +345,7 @@ calculator::element calculator::get_ans() {
     num.push(operate(num1, ch, num2));
     return;
   };
+  op.push('(');
   int len = expr.length();
   while (expr_index < len) {
     unsigned char ch = expr[expr_index];
@@ -351,16 +369,15 @@ calculator::element calculator::get_ans() {
     if (ch == '^') {
       op.push('^');
       expr_index++;
-      num.push(read_num());
       continue;
     }
     while (op.top() != '(' && priority(op.top(), ch) >= 0) {
       calculate();
     }
     op.push(ch);
-    num.push(read_num());
+    expr_index++;
   }
-  while (!op.empty()) {
+  while (op.top() != '(') {
     calculate();
   }
   return num.top();

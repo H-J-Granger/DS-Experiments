@@ -7,21 +7,22 @@ int main() {
   DATA_STRUCTURE::calculator a;
   if (a.legal()) {
     std::cout << a.get_expr() << " = ";
-    struct DATA_STRUCTURE::calculator::element tmp = a.get_ans();
+    DATA_STRUCTURE::calculator::element tmp = a.get_ans();
     if (tmp.flag == 0)
       std::cout << tmp.num_int << std::endl;
     else
       std::cout << tmp.num_double << std::endl;
   }
-  DATA_STRUCTURE::calculator b("10*3.2+2*(2+3/2)");
+  DATA_STRUCTURE::calculator b("3^2");
   if (b.legal()) {
     std::cout << b.get_expr() << " = ";
-    struct DATA_STRUCTURE::calculator::element tmp = b.get_ans();
+    DATA_STRUCTURE::calculator::element tmp = b.get_ans();
     if (tmp.flag == 0)
       std::cout << tmp.num_int << std::endl;
     else
       std::cout << tmp.num_double << std::endl;
   }
+#endif
 
   while (1) {
     std::string s;
@@ -29,19 +30,21 @@ int main() {
     if (s[0] == 'q')
       break;
     DATA_STRUCTURE::calculator b(s);
+    DATA_STRUCTURE::calculator::element tmp;
+    if (!b.legal()) {
+      std::cout << "Illegal input: " << s << std::endl;
+      continue;
+    }
     try {
-      if (b.legal()) {
-        std::cout << b.get_expr() << " = ";
-        struct DATA_STRUCTURE::calculator::element tmp = b.get_ans();
-        if (tmp.flag == 0)
-          std::cout << tmp.num_int << std::endl;
-        else
-          std::cout << tmp.num_double << std::endl;
-      }
-    } catch (std::exception e) {
+      tmp = b.get_ans();
+      std::cout << b.get_expr() << " = ";
+      if (tmp.flag == 0)
+        std::cout << tmp.num_int << std::endl;
+      else
+        std::cout << tmp.num_double << std::endl;
+    } catch (std::exception const& e) {
       std::cout << e.what() << std::endl;
     }
   }
-#endif
   return 0;
 }
