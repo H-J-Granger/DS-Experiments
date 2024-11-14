@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef MAX_SET_NUM
 #define MAX_SET_NUM 101
+#endif  // #ifndef MAX_SET_NUM
 
 namespace DATA_STRUCTURE {
 

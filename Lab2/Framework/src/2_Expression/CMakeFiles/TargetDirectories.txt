@@ -1,0 +1,3 @@
+/home/mirai/Data-Structure/Experiments/Lab2/Framework/src/2_Expression/CMakeFiles/2_Expression.dir
+/home/mirai/Data-Structure/Experiments/Lab2/Framework/src/2_Expression/CMakeFiles/edit_cache.dir
+/home/mirai/Data-Structure/Experiments/Lab2/Framework/src/2_Expression/CMakeFiles/rebuild_cache.dir

@@ -21,20 +21,20 @@ class calculator {
   ~calculator() = default;
 
   std::string get_expr();
-  struct element get_ans();
-  bool legal();
+  element get_ans();
+  bool legal() noexcept;
 
  private:
   std::string expr = "1+2*(3-1+4)";
   int expr_index = 0;
-  stack<struct element> num;
+  stack<element> num;
   stack<char> op;
 
-  struct element read_num();
+  element read_num();
   int priority_regular(char c);
-  int priority(char c1, char c2);
-  struct element operate(struct element element1, char c,
-                         struct element element2);
+  int priority(char c1,
+               char c2) noexcept(noexcept(calculator::priority_regular));
+  element operate(element element1, char c, element element2);
 };
 
 }  // namespace DATA_STRUCTURE

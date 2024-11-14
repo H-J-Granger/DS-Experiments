@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef MAX_LINK_LIST_NUM
 #define MAX_LINK_LIST_NUM 1001
+#endif  // #ifndef MAX_LINK_LIST_NUM
 
 namespace DATA_STRUCTURE {
 
