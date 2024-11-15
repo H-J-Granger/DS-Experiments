@@ -1,8 +1,9 @@
-#include <math.h>
-#include <iostream>
-
 #include "queue.h"
 #include "unordered_set.h"
+
+#include <cmath>
+#include <cstring>
+#include <iostream>
 
 namespace DATA_STRUCTURE {
 
@@ -34,7 +35,8 @@ class walk {
     int x, y;
     unordered_set<int> get_gold;
   };
-  queue<struct element> q;
+
+  queue<element> q;
 
   int compute_distance(int i, int x, int y);
 };

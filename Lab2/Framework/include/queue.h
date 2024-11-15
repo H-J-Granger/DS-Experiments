@@ -21,9 +21,9 @@ class queue : public list<data_base> {
           "DATA_STRUCTURE::queue::pop: Attempt to pop the top of an empty "
           "queue.");
     }
-    tail_index--;
-    if (tail_index == -1) [[unlikely]] {
-      tail_index = MAX_LINK_LIST_NUM - 1;
+    top_index++;
+    if (top_index == MAX_LINK_LIST_NUM) [[unlikely]] {
+      top_index = 0;
     }
     return;
   }
